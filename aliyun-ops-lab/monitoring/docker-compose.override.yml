@@ -1,0 +1,48 @@
+services:
+  grafana:
+    env_file: ./grafana-smtp.env
+  prometheus:
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+  node-exporter:
+    image: prom/node-exporter:v1.8.2
+    restart: unless-stopped
+    network_mode: host
+    pid: host
+    volumes:
+      - /:/host:ro,rslave
+    command:
+      - --path.rootfs=/host
+  loki:
+    image: grafana/loki:3.6.22
+    container_name: loki
+    command: -config.file=/etc/loki/loki-config.yaml
+    volumes:
+      - ./loki/loki-config.yaml:/etc/loki/loki-config.yaml:ro
+      - loki-data:/loki
+    ports:
+      - "127.0.0.1:3100:3100"
+    mem_limit: 256m
+    restart: unless-stopped
+  alloy:
+    image: grafana/alloy:v1.22.0
+    container_name: alloy
+    command:
+      - run
+      - --server.http.listen-addr=0.0.0.0:12345
+      - --storage.path=/var/lib/alloy/data
+      - /etc/alloy/config.alloy
+    volumes:
+      - ./alloy/config.alloy:/etc/alloy/config.alloy:ro
+      - alloy-data:/var/lib/alloy/data
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /var/log/journal:/var/log/journal:ro
+      - /run/log/journal:/run/log/journal:ro
+      - /etc/machine-id:/etc/machine-id:ro
+    ports:
+      - "127.0.0.1:12345:12345"
+    mem_limit: 256m
+    restart: unless-stopped
+volumes:
+  loki-data:
+  alloy-data:

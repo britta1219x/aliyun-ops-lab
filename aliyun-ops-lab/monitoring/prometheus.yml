@@ -1,0 +1,19 @@
+global:
+  scrape_interval: 15s
+scrape_configs:
+  - job_name: mysql
+    static_configs:
+      - targets: ['exporter-master:9104']
+        labels: {instance: mysql-master}
+      - targets: ['exporter-slave:9104']
+        labels: {instance: mysql-slave}
+
+  - job_name: node
+    static_configs:
+      - targets: ['host.docker.internal:9100']
+        labels:
+          instance: zjy-cloud
+
+  - job_name: k3s-kube-state-metrics
+    static_configs:
+      - targets: ["host.docker.internal:30080"]
