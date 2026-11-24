@@ -1,6 +1,0 @@
-{
-  "registry-mirrors": [
-    "https://<your-id>.mirror.aliyuncs.com",
-    "https://docker.1ms.run"
-  ]
-}
