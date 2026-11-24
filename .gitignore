@@ -1,0 +1,10 @@
+.env
+*.env
+.pw
+*.tfstate
+*.tfstate.*
+tfplan
+.terraform/
+*.log
+*.bak*
+*.sql.gz
