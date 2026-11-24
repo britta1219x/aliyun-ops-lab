@@ -1,0 +1,42 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: lab-data
+  namespace: lab
+spec:
+  accessModes: [ReadWriteOnce]
+  storageClassName: local-path
+  resources:
+    requests:
+      storage: 100Mi
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: writer
+  namespace: lab
+spec:
+  schedule: "* * * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      template:
+        spec:
+          restartPolicy: Never
+          containers:
+            - name: writer
+              image: busybox:1.36
+              command: ["sh", "-c", "echo $(date +%T) from $HOSTNAME >> /data/log.txt; wc -l /data/log.txt"]
+              volumeMounts:
+                - name: data
+                  mountPath: /data
+              resources:
+                requests: {cpu: 10m, memory: 8Mi}
+                limits: {cpu: 50m, memory: 16Mi}
+          volumes:
+            - name: data
+              persistentVolumeClaim:
+                claimName: lab-data

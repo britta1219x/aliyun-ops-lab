@@ -1,0 +1,35 @@
+- name: Install Docker from Ubuntu repo
+  apt:
+    name:
+      - docker.io
+      - docker-compose-v2
+    state: present
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: Ensure /etc/docker exists
+  file:
+    path: /etc/docker
+    state: directory
+    mode: "0755"
+
+- name: daemon.json (registry mirrors)
+  copy:
+    src: daemon.json
+    dest: /etc/docker/daemon.json
+    owner: root
+    group: root
+    mode: "0644"
+  notify: restart docker
+
+- name: Docker enabled and running
+  systemd:
+    name: docker
+    enabled: true
+    state: started
+
+- name: Add zjy to docker group
+  user:
+    name: zjy
+    groups: docker
+    append: true

@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cicd-web
+  namespace: cicd
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cicd-web
+  template:
+    metadata:
+      labels:
+        app: cicd-web
+    spec:
+      imagePullSecrets:
+      - name: acr-pull
+      containers:
+      - name: web
+        image: <ACR_VPC_ENDPOINT>/zjy-lab/web-demo:608b6e3
+        ports:
+        - containerPort: 80
+        resources:
+          requests: {cpu: 20m, memory: 16Mi}
+          limits: {cpu: 100m, memory: 64Mi}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cicd-web
+  namespace: cicd
+spec:
+  selector:
+    app: cicd-web
+  ports:
+  - port: 80
+    targetPort: 80
